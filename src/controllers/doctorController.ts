@@ -3,7 +3,11 @@ import bcrypt from 'bcrypt';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middlewares/authMiddleware';
 import { TreatmentStatus } from '@prisma/client';
+<<<<<<< HEAD
 import OpenAI from 'openai';
+=======
+import { GoogleGenerativeAI } from '@google/generative-ai';
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
 
 // Helper to check if doctor is verified
 const isDoctorVerified = async (userId: string) => {
@@ -169,7 +173,11 @@ export const getPatients = async (req: AuthRequest, res: Response) => {
     });
 
     const patientMap = new Map();
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
     treatments.forEach(t => {
       const patientId = t.patient.id;
       if (!patientMap.has(patientId)) {
@@ -387,24 +395,54 @@ export const getPatientHistory = async (req: AuthRequest, res: Response) => {
 
 export const draftFromAudio = async (req: AuthRequest, res: Response) => {
   try {
+<<<<<<< HEAD
     const { text } = req.body;
+=======
+    const { text, currentState } = req.body;
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
 
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
     }
 
+<<<<<<< HEAD
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ error: 'OpenAI API key is missing in environment variables' });
     }
 
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
+=======
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI API key is missing in environment variables' });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3.6-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+      }
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
     });
 
     const prompt = `
 You are a medical assistant parsing transcribed voice notes from a doctor.
+<<<<<<< HEAD
 Extract the following information into a structured JSON format.
 If a field is not mentioned, leave it as an empty string (or empty array for prescriptions).
+=======
+You will be given the CURRENT STATE of the structured data, as well as a NEW TRANSCRIBED TEXT.
+Update the current state by merging the new information into it.
+Do not remove existing information unless the new text explicitly contradicts or overrides it.
+If a field is not mentioned in either the current state or new text, leave it as an empty string (or empty array for prescriptions).
+
+CURRENT STATE:
+${currentState ? JSON.stringify(currentState, null, 2) : '{}'}
+
+NEW TRANSCRIBED TEXT:
+"${text}"
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
 
 JSON Schema:
 {
@@ -424,6 +462,7 @@ JSON Schema:
     }
   ]
 }
+<<<<<<< HEAD
 
 Transcribed Text:
 "${text}"
@@ -441,6 +480,15 @@ Transcribed Text:
     const content = response.choices[0].message.content;
     if (!content) {
       throw new Error('No content returned from OpenAI');
+=======
+`;
+
+    const result = await model.generateContent(prompt);
+    const content = result.response.text();
+
+    if (!content) {
+      throw new Error('No content returned from Gemini');
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
     }
 
     const draftData = JSON.parse(content);
@@ -579,9 +627,15 @@ export const submitVerification = async (req: AuthRequest, res: Response) => {
   try {
     const doctorId = req.user!.id;
     const { licenseNumber, specialization, qualification, registrationYear, issuingAuthority } = req.body;
+<<<<<<< HEAD
     
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     
+=======
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+>>>>>>> b2696e7eb6e46cf763620d88446745bb12e8c103
     const licenseDoc = files['licenseDocument'] ? files['licenseDocument'][0].filename : null;
     const qualDoc = files['qualificationDocument'] ? files['qualificationDocument'][0].filename : null;
 
